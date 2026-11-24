@@ -4,7 +4,6 @@ from collections.abc import Awaitable, Callable
 from typing import Any
 
 from pipecat.frames.frames import EndWorkerFrame
-from pipecat.processors.frame_processor import FrameDirection
 
 from connect_a2a import FinishType
 from pipecat_connect_a2a.serializer import AmazonConnectA2AFrameSerializer
@@ -29,7 +28,8 @@ def make_finish_handlers(
     async def _end(params: Any, type: FinishType, reason: str | None) -> None:
         serializer.request_finish(type, reason)
         await params.result_callback({"status": "ok"})
-        await params.llm.push_frame(EndWorkerFrame(), FrameDirection.UPSTREAM)
+        # Downstream, so the goodbye already queued ahead of it is spoken before the pipeline ends.
+        await params.llm.push_frame(EndWorkerFrame())
 
     async def escalate_to_human(params: Any) -> None:
         await _end(params, FinishType.ESCALATE, params.arguments.get("reason"))

@@ -3,9 +3,16 @@ name = "pipecat-connect-a2a"
 version = "0.1.0"
 description = "Pipecat connector for Amazon Connect agent-to-agent (A2A) voice"
 readme = "README.md"
-authors = [
-    { name = "Krish Patel", email = "knpatel@g.ucla.edu" }
+license = "BSD-2-Clause"
+license-files = ["LICENSE"]
+keywords = ["pipecat", "amazon-connect", "a2a", "voice-agent", "contact-center", "telephony"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Communications :: Telephony",
+    "Typing :: Typed",
 ]
+authors = [{ name = "Krish Patel" }]
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.165.0",
@@ -14,6 +21,10 @@ dependencies = [
     "uvicorn>=0.54.0",
     "websockets>=17.4",
 ]
+
+[project.urls]
+Homepage = "https://github.com/krish1925/pipecat-connect-a2a"
+Issues = "https://github.com/krish1925/pipecat-connect-a2a/issues"
 
 [project.optional-dependencies]
 examples = [

@@ -138,11 +138,10 @@ class AmazonConnectA2AFrameSerializer(FrameSerializer):
             return None
         if isinstance(frame, InterruptionFrame):
             self.turn.interrupted = True
-            if self._remote_interruption:
-                self._remote_interruption = False
-                await self._emit(self.session.on_remote_interruption(self._otlp()))
-            else:
-                await self._emit(self.session.interrupt(self._otlp()))
+            # Always tell Connect the response was abandoned (barge-in sequence in the spec):
+            # without it the dropped artifact never closes.
+            self._remote_interruption = False
+            await self._emit(self.session.interrupt(self._otlp()))
             self.new_turn()
             return None
         if isinstance(frame, AudioRawFrame):

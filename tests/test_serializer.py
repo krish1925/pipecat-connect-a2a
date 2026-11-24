@@ -68,7 +68,7 @@ async def test_barge_in_then_new_response_is_valid():
     assert "message" in kinds  # the INTERRUPTION
 
 
-async def test_remote_interruption_is_not_echoed():
+async def test_remote_interruption_is_echoed_and_closes_the_artifact():
     ser, sent = await make()
     await ser.serialize(audio())
     frame = await ser.deserialize(json.dumps(S.INTERRUPTION))
@@ -76,7 +76,8 @@ async def test_remote_interruption_is_not_echoed():
     before = len(sent)
     await ser.serialize(frame)
     new = sent[before:]
-    assert all("message" not in f["result"] for f in new)
+    assert new[0]["result"]["message"]["metadata"][S.KEY] == "INTERRUPTION"
+    assert next(iter(new[-1]["result"])) == "statusUpdate"
 
 
 async def test_escalation_sends_finish_escalate():

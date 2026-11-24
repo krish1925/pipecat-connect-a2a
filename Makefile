@@ -8,3 +8,8 @@ test:
 	uv run pytest -q
 fmt:
 	uv run ruff format . && uv run ruff check . --fix
+
+eval:
+	uv run python scripts/eval_mock.py --repeat 3
+build:
+	uv build

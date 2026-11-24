@@ -10,6 +10,15 @@ turn detection, STT, the LLM and TTS.
 > call**: that needs an account with third-party AI agents enabled (see Phase 0 below). Measured
 > latency numbers will go here once it has.
 
+## Why
+
+Amazon Connect can hand a live call to an external AI agent over A2A: one persistent `wss://`
+connection per call carrying JSON-RPC messages and base64 16-bit PCM in both directions. Pipecat
+has serializers for Genesys, Twilio and others, but none for Connect, so wiring a Pipecat bot to it
+meant implementing a stateful protocol by hand. A single protocol slip (a second open audio
+artifact, a missing trace, closing with 1000) makes Connect drop the call. This project does that
+part once, with tests, so you write the bot and not the protocol.
+
 ## What's in the box
 
 | Package | What it is |
@@ -54,6 +63,17 @@ Full bot: [`examples/bot.py`](examples/bot.py). Run it with `uv run --extra exam
 The state machine enforces what makes Connect drop a call: one open audio artifact at a time,
 `lastChunk` on every finished response, a trace before every terminal status, nothing after `FINISH`,
 and no speech before `READY`. Never close with 1000 to end a call; the library sends `FINISH`.
+
+## Evaluation on mock data
+
+```bash
+make eval    # 6 scenarios x 4 rate pairs through the real Pipecat transport, with a simulated Connect
+```
+
+Scenarios: single turn, barge-in, DTMF, silence prompt, escalation, completion. Every run is checked
+for protocol violations; the connector's own added latency (text in to first audio chunk out) is
+about 35 ms p50 with an instant bot. That is the connector's overhead, not end-to-end latency,
+which depends on your STT, LLM and TTS and still has to be measured on real calls.
 
 ## Test without Connect
 

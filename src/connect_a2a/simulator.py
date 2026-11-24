@@ -8,6 +8,7 @@ the rules that make Connect drop a call, and records every frame.
 import asyncio
 import base64
 import json
+import time
 import wave
 from dataclasses import dataclass, field
 from typing import Any
@@ -28,6 +29,7 @@ class Violation:
 @dataclass
 class CallRecord:
     frames: list[dict[str, Any]] = field(default_factory=list)
+    times: list[float] = field(default_factory=list)  # monotonic arrival time per frame
     violations: list[Violation] = field(default_factory=list)
     audio: bytearray = field(default_factory=bytearray)
     close_code: int | None = None
@@ -157,6 +159,7 @@ class ConnectSimulator:
         self._ws: Any = None
         self._n = 0
         self._reader: asyncio.Task[None] | None = None
+        self.sent_at: dict[str, float] = {}
 
     def _id(self) -> str:
         self._n += 1
@@ -217,6 +220,7 @@ class ConnectSimulator:
             async for raw in self._ws:
                 frame = json.loads(raw)
                 self.rec.frames.append(frame)
+                self.rec.times.append(time.monotonic())
                 self._v.check(frame)
         except websockets.ConnectionClosed:
             pass
@@ -229,6 +233,10 @@ class ConnectSimulator:
             await self._ws.send(_msg(self._id(), [{"raw": b64, "mediaType": "audio/lpcm"}], None))
             if self.realtime:
                 await asyncio.sleep(self.chunk_ms / 1000)
+
+    async def send_text(self, text: str) -> None:
+        self.sent_at[text] = time.monotonic()
+        await self._ws.send(_msg(self._id(), [{"text": text, "mediaType": "text/plain"}], None))
 
     async def send_silence(self, secs: float) -> None:
         await self.send_audio(b"\x00\x00" * int(self.in_rate * secs))

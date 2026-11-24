@@ -9,3 +9,4 @@ __pycache__/
 dist/
 .env
 docs/PROGRESS.md
+eval_report.json
