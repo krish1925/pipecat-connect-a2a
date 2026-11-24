@@ -15,6 +15,11 @@ dependencies = [
     "websockets>=17.4",
 ]
 
+[project.optional-dependencies]
+examples = [
+    "pipecat-ai[cartesia,deepgram,openai,silero]>=1.17.0",
+]
+
 [build-system]
 requires = ["uv_build>=0.10.0,<0.11.0"]
 build-backend = "uv_build"
@@ -32,6 +37,7 @@ module-name = ["connect_a2a", "pipecat_connect_a2a"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 
 [tool.ruff]
@@ -40,6 +46,11 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"examples/*" = ["E501"]
+"tests/*" = ["E501", "E702", "B017"]
+"src/connect_a2a/simulator.py" = ["E501"]
 
 [tool.mypy]
 strict = true
