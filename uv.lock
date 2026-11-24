@@ -1409,7 +1409,7 @@ websocket = [
 ]
 
 [[package]]
-name = "pipecat-connect-a2a"
+name = "pipecat-amazon-connect"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
