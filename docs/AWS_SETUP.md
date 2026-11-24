@@ -37,3 +37,14 @@ service model but not run against a real account.
 
 ## Cleanup
 Release the number; delete the application, AI agent, secret (7-30 day recovery window), and schedule KMS key deletion.
+
+## Connection behaviour (from AWS docs)
+
+- Connect opens the WebSocket once per voice call. If it drops without a close frame, or with
+  1005/1006/1012/1013/1014, Connect reconnects **once** and sends a new `INIT_SESSION` with the same
+  `contextId`. A second drop ends the call (Connect closes with 1011). Close with 1012 when you
+  deploy. Resuming a live pipeline on reconnect is not implemented yet.
+- Connect retries the upgrade once on HTTP 502/503/504 or no response. A wrong key must return 401
+  or 403; those are not retried.
+- Idle timeouts and fatal protocol errors arrive as an `ERROR` message (408 / 400) before Connect
+  closes the connection.
