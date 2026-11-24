@@ -24,14 +24,16 @@ serializer, init = await accept_connect_session(websocket, api_key=A2A_API_KEY)
 transport = FastAPIWebsocketTransport(
     websocket=websocket,
     params=FastAPIWebsocketParams(
-        audio_in_enabled=True, audio_out_enabled=True,
-        serializer=serializer, audio_out_10ms_chunks=2,   # 20 ms chunks
+        audio_in_enabled=True,
+        audio_out_enabled=True,
+        serializer=serializer,
+        audio_out_10ms_chunks=2,  # 20 ms chunks
     ),
 )
 # pipeline: input -> STT -> user agg -> LLM -> TTS -> A2ATurnProcessor(serializer) -> output
 # set PipelineParams(audio_in_sample_rate=serializer.audio_in_sample_rate, ...)
 escalate, end_call = make_finish_handlers(serializer)
-llm.register_function("escalate_to_human", escalate)   # sends FINISH ESCALATE
+llm.register_function("escalate_to_human", escalate)  # sends FINISH ESCALATE
 ```
 
 Full bot: [`examples/bot.py`](examples/bot.py). Run it with `uv run --extra examples uvicorn examples.bot:app`.
